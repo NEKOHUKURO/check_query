@@ -5,9 +5,26 @@ not_reserved_word = "OVY"
 status = []
 
 def shaping(real_sql = ""):
-    shaping_sql = real_sql.replace(";", " ;").replace("(", " ( ").replace(")", " ) ").replace(",", " , ")
+    shaping_sql = real_sql
+    
+    f = open("status/reserved", "r")
+    status = f.read().split('\n')
+    for s in status:
+        if s == ";":
+            shaping_sql = shaping_sql.replace(";", " ;")
+        else:
+            shaping_sql = shaping_sql.replace(s, " " + s + " ")
+
+    f = open("status/other", "r")
+    status = f.read().split('\n')
+
+    for s in status:
+        shaping_sql = shaping_sql.replace(s, " " + s + " ")
+
     shaping_sql = re.sub("\s+", " ", shaping_sql).lower()
     shaping_sql = re.sub(" +$", "", shaping_sql)
+    shaping_sql = re.sub("'.*?'", "'string_value'", shaping_sql)
+    shaping_sql = re.sub("\".*?\"", "'string_value'", shaping_sql)
     return shaping_sql
 
 def lower(str = ""):
@@ -23,7 +40,6 @@ def read_status():
 
     f = open("status/other", "r")
     status = status + list(map(lower, f.read().split('\n')))
-    #status.append(start_status)
     return status
 
 def word2status(word = ""):
