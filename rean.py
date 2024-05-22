@@ -1,25 +1,34 @@
 import queue
 import re
 
-not_reserved_word = "OVY"
+column_value = "VALUE"
+column_name  = "COLUMN"
+
 status = []
 
 def shaping(real_sql = ""):
     shaping_sql = real_sql
     
-    f = open("status/reserved", "r")
+    f = open("status/reread/operator", "r")
     status = f.read().split('\n')
+    f = open("status/non_reread/other", "r")
+    status = status + f.read().lower().split('\n')
     for s in status:
         if s == ";":
             shaping_sql = shaping_sql.replace(";", " ;")
         else:
             shaping_sql = shaping_sql.replace(s, " " + s + " ")
 
-    f = open("status/other", "r")
-    status = f.read().split('\n')
 
-    for s in status:
-        shaping_sql = shaping_sql.replace(s, " " + s + " ")
+
+    f = open("status/non_reread/reserved", "r")
+    status = status + f.read().lower().split('\n')
+    
+    f = open("status/reread/and_or", "r")
+    status = status + f.read().lower().split('\n')
+
+    f = open("status/reread/set_operator", "r")
+    status = status + f.read().lower().split('\n')
 
     shaping_sql = re.sub("\s+", " ", shaping_sql).lower()
     shaping_sql = re.sub(" +$", "", shaping_sql)
@@ -32,14 +41,20 @@ def lower(str = ""):
 
 def read_status():
     status = []
-    f = open("status/operator", "r")
-    status= status + f.read().split('\n')
+    f = open("status/reread/operator", "r")
+    status = status + f.read().lower().split('\n')
 
-    f = open("status/reserved", "r")
-    status = status + list(map(lower, f.read().split('\n')))
+    f = open("status/non_reread/other", "r")
+    status = status + f.read().lower().split('\n')
 
-    f = open("status/other", "r")
-    status = status + list(map(lower, f.read().split('\n')))
+    f = open("status/non_reread/reserved", "r")
+    status = status + f.read().lower().split('\n')
+    
+    f = open("status/reread/and_or", "r")
+    status = status + f.read().lower().split('\n')
+
+    f = open("status/reread/set_operator", "r")
+    status = status + f.read().lower().split('\n')
     return status
 
 def word2status(word = ""):
@@ -47,7 +62,10 @@ def word2status(word = ""):
     if word in status:
         return word
     else:
-        return not_reserved_word
+        if word.replace(".","").isidentifier():
+            return column_name
+        else:
+            return column_value
 
 def main():
     start_status = "start"
@@ -63,6 +81,7 @@ def main():
     line = 0
     for sql in sqls:
         print("---------startt------------")
+        print(sql)
         i = 0
         j = 0
         line = line + 1
